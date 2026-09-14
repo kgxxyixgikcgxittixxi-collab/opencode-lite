@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "opencode/big-pickle",
+  "model": "opencode/deepseek-v4-flash-free",
   "small_model": "opencode/nemotron-3.5-lightning-free",
   "autoupdate": false,
   "share": "disabled",
@@ -9,15 +9,20 @@
   "provider": {
     "opencode": {
       "options": {
-        "timeout": 60000,
-        "chunkTimeout": 30000
+        "timeout": 30000,
+        "chunkTimeout": 15000
       }
     }
+  },
+  "permission": {
+    "webfetch": "deny",
+    "websearch": "deny",
+    "skill": "deny"
   },
   "compaction": {
     "auto": true,
     "prune": true,
-    "reserved": 8000
+    "reserved": 4000
   },
   "watcher": {
     "ignore": [
@@ -29,9 +34,12 @@
       ".cache/**",
       "__pycache__/**",
       ".venv/**",
-      "*.db-wal",
-      "*.db-shm",
-      "coverage/**"
+      "*.db*",
+      "coverage/**",
+      ".next/**",
+      "vendor/**",
+      "*.tmp",
+      "*.temp"
     ]
   },
   "mcp": {},

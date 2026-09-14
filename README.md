@@ -7,30 +7,32 @@ Giữ nguyên các model chat **free của opencode Zen**, chỉ làm nhẹ đ�
 
 `enabled_providers: ["opencode"]` — chỉ tải provider Zen, nhẹ RAM, không cần key Groq/DeepSeek riêng.
 
-- Chính: `opencode/big-pickle` (free, coding tốt)
-- Phụ/nhẹ: `opencode/nemotron-3.5-lightning-free` (tạo title, task nhỏ — nhanh, ít token)
+- Chính: `opencode/deepseek-v4-flash-free` (flash = nhanh, coding tốt, nhẹ cho Termux)
+- Phụ/nhẹ: `opencode/nemotron-3.5-lightning-free` (tạo title, task nhỏ — nhanh nhất, ít token)
 
 Các model free khác vẫn dùng được qua `/models` (đổi lúc chạy, không cần sửa config):
 
-`deepseek-v4-flash-free`, `mimo-v2.5-free`, `ling-3.0-flash-fin-free`,
-`nemotron-3-ultra-free`, `big-pickle`,
+`big-pickle`, `mimo-v2.5-free`, `ling-3.0-flash-fin-free`,
+`nemotron-3-ultra-free`,
 `muse-spark-1.2-contributor-free`, `muse-spark-1.3-contributor-free`
 
 > Free theo chính sách opencode Zen, có thể thay đổi. Xem: `oc-lite models` hoặc https://opencode.ai/docs/zen/
 
-## Tối ưu Termux
+## Tối ưu Termux (chỉ giữ build code)
 
-- `autoupdate: false` — không tải lại binary 176MB mỗi lần mở
+- `autoupdate: false` + `OPENCODE_DISABLE_AUTOUPDATE=true` — không check/tải binary mỗi lần mở
 - `snapshot: false` — bỏ git snapshot (đỡ I/O trên PRoot)
 - `share: disabled` — không upload session
-- `compaction.prune: true` — xóa tool-output cũ, đỡ tràn context
-- `watcher.ignore` — bỏ qua node_modules, .git, dist, build, *.log, cache
+- `permission deny: webfetch, websearch, skill` — cắt mạng/skill nặng, chỉ giữ `bash, read, edit, write, grep, glob` để build code
+- `provider.opencode timeout 30s / chunk 15s` — fail nhanh, tránh treo máy yếu
+- `compaction.prune: true, reserved: 4000` — xóa tool-output cũ, compaction ít giật lag
+- `watcher.ignore` — bỏ qua node_modules, .git, dist, build, *.log, cache, vendor, .next
 - Không set `shell` cứng — để opencode tự phát hiện shell Termux
 - `server.hostname: 127.0.0.1` — chỉ listen local
-- `subagent_depth: 0` — tắt subagent lồng nhau (đỡ RAM; máy khỏe có thể sửa thành `1`)
+- `subagent_depth: 0` — tắt subagent lồng nhau (đỡ RAM)
 - `mcp: {}` — tắt MCP (đỡ RAM)
+- `oc-lite`: `--pure` (tắt plugin ngoài), tắt LSP download, tắt mouse/title/filewatcher, `run` không TUI là nhẹ nhất
 - TUI `simple`, tắt mouse/animation/sound/notification
-- Script dùng `$HOME`, tự tìm binary, giảm `BUN_CONFIG_MAX_HTTP_REQUESTS` + `UV_THREADPOOL_SIZE` khi phát hiện Termux
 
 ## Cài đặt (Termux)
 
