@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# oc-lite — launcher nhẹ cho opencode trên điện thoại / Ubuntu giả lập
+set -u
+BIN="/root/.opencode/bin/opencode"
+export OPENCODE_CONFIG="/root/.config/opencode/opencode.json"
+export DO_NOT_TRACK=1
+export NODE_NO_WARNINGS=1
+export BUN_CONFIG_MAX_HTTP_REQUESTS=4
+export UV_THREADPOOL_SIZE=2
+
+if command -v free >/dev/null 2>&1; then
+  AVAIL=$(free -m | awk '/^Mem:/{print $7}')
+  if [ "${AVAIL:-9999}" -lt 500 ]; then
+    echo "[oc-lite] RAM trống thấp (${AVAIL}MB). Dùng: oc-lite run \"task\" thay vì TUI."
+  fi
+fi
+
+case "${1:-}" in
+  run)
+    shift
+    exec "$BIN" --pure run "$@"
+    ;;
+  full)
+    shift
+    exec "$BIN" "$@"
+    ;;
+  *)
+    exec "$BIN" --pure --mini --no-replay "$@"
+    ;;
+esac

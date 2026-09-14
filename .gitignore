@@ -1,0 +1,7 @@
+*.bak
+*.bak-*
+node_modules/
+.cache/
+*.db
+*.db-shm
+*.db-wal

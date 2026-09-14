@@ -1,0 +1,41 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "groq/llama-3.3-70b-versatile",
+  "small_model": "groq/llama-3.1-8b-instant",
+  "autoupdate": false,
+  "share": "disabled",
+  "snapshot": false,
+  "enabled_providers": ["groq", "deepseek"],
+  "provider": {
+    "groq": {
+      "options": {
+        "timeout": 60000,
+        "chunkTimeout": 30000
+      }
+    }
+  },
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 8000
+  },
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      ".git/**",
+      "dist/**",
+      "build/**",
+      "*.log",
+      ".cache/**",
+      "__pycache__/**",
+      ".venv/**"
+    ]
+  },
+  "mcp": {},
+  "shell": "/bin/bash",
+  "server": {
+    "hostname": "127.0.0.1"
+  },
+  "subagent_depth": 1,
+  "default_agent": "build"
+}

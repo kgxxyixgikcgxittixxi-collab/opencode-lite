@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# oc-maintain — dọn dẹp opencode cho máy yếu
+set -u
+DB="/root/.local/share/opencode/opencode.db"
+LOG="/root/.local/share/opencode/log/opencode.log"
+
+if pgrep -f "\.opencode/bin/opencode" >/dev/null 2>&1; then
+  echo "[oc-maintain] opencode đang chạy. Chỉ xoay log + xóa cache..."
+  tail -200 "$LOG" > /tmp/oc.log 2>/dev/null && cat /tmp/oc.log > "$LOG" 2>/dev/null
+  rm -rf /root/.local/share/opencode/tool-output/* /root/.cache/opencode/models.json 2>/dev/null
+  echo "[oc-maintain] xong."
+  exit 0
+fi
+
+echo "[oc-maintain] DB truoc: $(du -h "$DB" | cut -f1)"
+python3 - "$DB" <<'EOF'
+import sqlite3, sys
+con = sqlite3.connect(sys.argv[1], timeout=30)
+cur = con.cursor()
+cur.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+print("checkpoint:", cur.fetchone())
+con.execute("VACUUM")
+con.commit()
+print("vacuum xong")
+con.close()
+EOF
+tail -200 "$LOG" > /tmp/oc.log 2>/dev/null && cat /tmp/oc.log > "$LOG" 2>/dev/null
+rm -rf /root/.local/share/opencode/tool-output/* /root/.cache/opencode/models.json 2>/dev/null
+echo "[oc-maintain] DB sau: $(du -h "$DB" | cut -f1)"
+
+if [ "${1:-}" = "--prune" ]; then
+  echo "--- 5 session nhat nhat ---"
+  python3 - "$DB" <<'EOF'
+import sqlite3, sys
+con = sqlite3.connect(sys.argv[1], timeout=10)
+for r in con.execute("SELECT id, substr(title,1,40), round(tokens_input/1000.0,1)||'k' FROM session ORDER BY tokens_input DESC LIMIT 5"):
+    print(r[0], "|", r[1], "| in:", r[2])
+con.close()
+EOF
+fi
