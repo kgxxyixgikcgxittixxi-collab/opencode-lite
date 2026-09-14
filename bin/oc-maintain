@@ -10,10 +10,11 @@ LOG="$DATA_DIR/log/opencode.log"
 TMP_LOG="${TMPDIR:-/tmp}/oc.log"
 
 is_running() {
+  # Khớp chặt để tránh báo nhầm: binary ~/.opencode/bin/opencode hoặc process tên opencode
   if command -v pgrep >/dev/null 2>&1; then
-    pgrep -f "opencode" >/dev/null 2>&1
+    pgrep -f "opencode/bin/opencode" >/dev/null 2>&1 || pgrep -x "opencode" >/dev/null 2>&1
   else
-    ps aux 2>/dev/null | grep -q "[o]pencode"
+    ps -o comm= 2>/dev/null | grep -qx "opencode"
   fi
 }
 
@@ -78,9 +79,14 @@ try:
     tables = {r[0] for r in cur.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     if "session" in tables:
         cols = [r[1] for r in cur.execute("PRAGMA table_info(session)")]
-        if "title" in cols:
-            for r in cur.execute("SELECT id, substr(title,1,40), updated_at FROM session ORDER BY updated_at DESC LIMIT 5"):
+        # schema thật dùng time_updated/time_created + tokens_input (đã verify)
+        order = "time_updated" if "time_updated" in cols else ("updated_at" if "updated_at" in cols else None)
+        if "title" in cols and order:
+            for r in cur.execute(f"SELECT id, substr(title,1,40), {order} FROM session ORDER BY {order} DESC LIMIT 5"):
                 print(r[0], "|", r[1])
+        elif "tokens_input" in cols:
+            for r in cur.execute("SELECT id, substr(title,1,40), round(tokens_input/1000.0,1) FROM session ORDER BY tokens_input DESC LIMIT 5"):
+                print(r[0], "|", r[1], "| in:", str(r[2]) + "k")
         else:
             for r in cur.execute("SELECT id FROM session LIMIT 5"):
                 print(r[0])
