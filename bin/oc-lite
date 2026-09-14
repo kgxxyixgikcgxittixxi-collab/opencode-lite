@@ -56,9 +56,10 @@ case "${1:-}" in
     exec "$BIN" "$@"
     ;;
   models)
-    echo "Free build-code (opencode Zen): deepseek-v4-flash-free (chính),"
-    echo "  nemotron-3.5-lightning-free (phụ/nhẹ), big-pickle,"
-    echo "  mimo-v2.5-free, ling-3.0-flash-fin-free, nemotron-3-ultra-free"
+    echo "Free (opencode Zen, verified 09/2026): big-pickle (chính),"
+    echo "  nemotron-3.5-lightning-free (phụ/nhẹ), mimo-v2.5-free,"
+    echo "  ling-3.0-flash-fin-free, nemotron-3-ultra-free,"
+    echo "  muse-spark-1.3-contributor-free"
     echo "Đổi trong TUI: /models | login: /connect -> opencode"
     ;;
   *)

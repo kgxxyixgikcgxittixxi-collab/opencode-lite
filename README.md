@@ -7,15 +7,16 @@ Giữ nguyên các model chat **free của opencode Zen**, chỉ làm nhẹ đ�
 
 `enabled_providers: ["opencode"]` — chỉ tải provider Zen, nhẹ RAM, không cần key Groq/DeepSeek riêng.
 
-- Chính: `opencode/deepseek-v4-flash-free` (flash = nhanh, coding tốt, nhẹ cho Termux)
+- Chính: `opencode/big-pickle` (free, coding stealth — đã verify còn sống)
 - Phụ/nhẹ: `opencode/nemotron-3.5-lightning-free` (tạo title, task nhỏ — nhanh nhất, ít token)
 
 Các model free khác vẫn dùng được qua `/models` (đổi lúc chạy, không cần sửa config):
 
-`big-pickle`, `mimo-v2.5-free`, `ling-3.0-flash-fin-free`,
+`mimo-v2.5-free`, `ling-3.0-flash-fin-free`,
 `nemotron-3-ultra-free`,
-`muse-spark-1.2-contributor-free`, `muse-spark-1.3-contributor-free`
+`muse-spark-1.3-contributor-free`
 
+> `deepseek-v4-flash-free` đã hết đợt free (Zen trả 400 Model is unavailable) — không dùng nữa.
 > Free theo chính sách opencode Zen, có thể thay đổi. Xem: `oc-lite models` hoặc https://opencode.ai/docs/zen/
 
 ## Tối ưu Termux (chỉ giữ build code)
