@@ -1,40 +1,75 @@
 #!/usr/bin/env bash
-# setup.sh — cài đặt opencode-lite config cho máy yếu
+# setup.sh — cài đặt opencode-lite cho Termux / PRoot Ubuntu / Linux
 set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
+HOME_DIR="${HOME:-$(eval echo ~)}"
 
 echo "=== opencode-lite setup ==="
 
-# Tạo thư mục config nếu chưa có
-mkdir -p ~/.config/opencode ~/.local/bin
+# Phát hiện môi trường
+IS_TERMUX=0
+if [ -n "${PREFIX:-}" ] && [ -d "/data/data/com.termux" ]; then IS_TERMUX=1; fi
+echo "HOME=$HOME_DIR | Termux=$IS_TERMUX"
 
-# Backup config cũ
-if [ -f ~/.config/opencode/opencode.json ]; then
-  cp ~/.config/opencode/opencode.json ~/.config/opencode/opencode.json.bak 2>/dev/null || true
-  echo "[1/4] Da backup config cu -> opencode.json.bak"
+mkdir -p "$HOME_DIR/.config/opencode" "$HOME_DIR/.local/bin"
+
+# Kiểm tra tool cần thiết (không tự cài để giữ nhẹ, chỉ nhắc)
+for t in python3; do
+  if ! command -v "$t" >/dev/null 2>&1; then
+    echo "[!] Thiếu $t. Termux: pkg install python | Ubuntu: sudo apt install python3"
+  fi
+done
+if [ "$IS_TERMUX" = "1" ] && ! command -v sqlite3 >/dev/null 2>&1; then
+  echo "[i] Gợi ý Termux: pkg install sqlite (để oc-maintain vacuum DB nhanh hơn, không bắt buộc)"
 fi
 
-# Copy config
-cp "$DIR/config/opencode.json" ~/.config/opencode/opencode.json
-cp "$DIR/config/tui.json" ~/.config/opencode/tui.json
-echo "[2/4] Da copy config"
+# Backup config cũ
+if [ -f "$HOME_DIR/.config/opencode/opencode.json" ]; then
+  cp "$HOME_DIR/.config/opencode/opencode.json" "$HOME_DIR/.config/opencode/opencode.json.bak" 2>/dev/null || true
+  echo "[1/4] Đã backup config cũ -> opencode.json.bak"
+fi
+if [ -f "$HOME_DIR/.config/opencode/tui.json" ]; then
+  cp "$HOME_DIR/.config/opencode/tui.json" "$HOME_DIR/.config/opencode/tui.json.bak" 2>/dev/null || true
+fi
+
+# Copy config (giữ nguyên model free opencode Zen)
+cp "$DIR/config/opencode.json" "$HOME_DIR/.config/opencode/opencode.json"
+cp "$DIR/config/tui.json" "$HOME_DIR/.config/opencode/tui.json"
+echo "[2/4] Đã copy config (model free: big-pickle + nemotron-lightning-free)"
+
+# Validate JSON
+python3 -c "import json; json.load(open('$HOME_DIR/.config/opencode/opencode.json')); json.load(open('$HOME_DIR/.config/opencode/tui.json')); print('JSON OK')"
 
 # Copy scripts
-cp "$DIR/bin/oc-lite" ~/.local/bin/oc-lite
-cp "$DIR/bin/oc-maintain" ~/.local/bin/oc-maintain
-chmod +x ~/.local/bin/oc-lite ~/.local/bin/oc-maintain
-echo "[3/4] Da copy scripts"
+cp "$DIR/bin/oc-lite" "$HOME_DIR/.local/bin/oc-lite"
+cp "$DIR/bin/oc-maintain" "$HOME_DIR/.local/bin/oc-maintain"
+chmod +x "$HOME_DIR/.local/bin/oc-lite" "$HOME_DIR/.local/bin/oc-maintain"
+bash -n "$HOME_DIR/.local/bin/oc-lite" && bash -n "$HOME_DIR/.local/bin/oc-maintain"
+echo "[3/4] Đã copy scripts + check syntax OK"
 
 # Kiểm tra PATH
-if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then
-  echo '[4/4] Can them ~/.local/bin vao PATH. Them vao ~/.bashrc:'
+if ! echo "$PATH" | grep -q "$HOME_DIR/.local/bin"; then
+  echo '[4/4] Cần thêm ~/.local/bin vào PATH. Thêm vào ~/.bashrc:'
   echo '  export PATH="$HOME/.local/bin:$PATH"'
 else
   echo "[4/4] PATH OK"
 fi
 
+# Kiểm tra binary opencode
+if ! command -v opencode >/dev/null 2>&1 && [ ! -x "$HOME_DIR/.opencode/bin/opencode" ]; then
+  echo ""
+  echo "[i] Chưa thấy binary opencode. Cài bằng:"
+  echo "  curl -fsSL https://opencode.ai/install | bash"
+  if [ "$IS_TERMUX" = "1" ]; then
+    echo "  (Termux: pkg install curl git nodejs-lts python -y trước)"
+  fi
+fi
+
 echo ""
-echo "=== Hoan thanh! ==="
-echo "  oc-lite              # TUI nhe hang ngay"
-echo "  oc-lite run \"task\"   # Chay task khong TUI (nhe nhat)"
-echo "  oc-maintain          # Don DB + log (chay khi da thoat opencode)"
+echo "=== Hoàn thành! ==="
+echo "  oc-lite              # TUI nhẹ hằng ngày (free Zen)"
+echo "  oc-lite run \"task\"   # Chạy task không TUI (nhẹ nhất)"
+echo "  oc-lite models       # Xem danh sách model free"
+echo "  oc-maintain          # Dọn DB + log (chạy khi đã thoát opencode)"
+echo ""
+echo "Sau khi cài, mở opencode và chạy /connect -> login opencode Zen để dùng model free."
